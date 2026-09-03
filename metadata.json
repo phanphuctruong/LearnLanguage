@@ -1,0 +1,6 @@
+{
+  "name": "Trợ Lý Học Ngoại Ngữ",
+  "description": "Trợ lý học ngoại ngữ thông minh cho người Việt hỗ trợ Tiếng Anh, Tiếng Nhật, Tiếng Pháp, Tiếng Thái, Tiếng Trung, Tiếng Đức và Tiếng Tây Ban Nha với phát âm IPA và phiên âm tiếng Việt bồi.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

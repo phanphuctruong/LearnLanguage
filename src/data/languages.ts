@@ -1,0 +1,175 @@
+import { LanguageConfig } from '../types';
+
+export const SUPPORTED_LANGUAGES: LanguageConfig[] = [
+  {
+    id: 'en',
+    name: 'Tiếng Anh',
+    nativeName: 'English',
+    flag: '🇬🇧',
+    voiceLang: 'en-US',
+    ruleExample: {
+      original: 'Thank you',
+      transliteration: 'Thẻng kiu',
+    },
+    samplePhrases: [
+      { label: 'Cảm ơn', query: 'Thank you' },
+      { label: 'Xin chào', query: 'Hi, how are you?' },
+      { label: 'Rất vui được gặp bạn', query: 'Nice to meet you' },
+      { label: 'Cái này bao nhiêu tiền?', query: 'How much is this?' },
+      { label: 'Chúc một ngày tốt lành', query: 'Have a wonderful day' },
+      { label: 'Hẹn gặp lại', query: 'See you again soon' },
+    ],
+  },
+  {
+    id: 'ja',
+    name: 'Tiếng Nhật',
+    nativeName: '日本語',
+    flag: '🇯🇵',
+    voiceLang: 'ja-JP',
+    ruleExample: {
+      original: 'こんにちは (Konnichiwa)',
+      transliteration: 'Côn-ni-chi-wa',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: 'Konnichiwa' },
+      { label: 'Cảm ơn rất nhiều', query: 'Arigatou gozaimasu' },
+      { label: 'Xin lỗi / Làm phiền', query: 'Sumimasen' },
+      { label: 'Ngon quá', query: 'Oishii desu' },
+      { label: 'Chúc ngủ ngon', query: 'Oyasuminasai' },
+      { label: 'Tạm biệt', query: 'Sayonara' },
+    ],
+  },
+  {
+    id: 'zh',
+    name: 'Tiếng Trung',
+    nativeName: '中文 (汉语)',
+    flag: '🇨🇳',
+    voiceLang: 'zh-CN',
+    ruleExample: {
+      original: '你好 (Nǐ hǎo)',
+      transliteration: 'Ní hảo',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: 'Nǐ hǎo' },
+      { label: 'Cảm ơn bạn', query: 'Xièxie nǐ' },
+      { label: 'Không có gì', query: 'Bú kèqi' },
+      { label: 'Bạn ăn cơm chưa?', query: 'Nǐ chīfàn le ma?' },
+      { label: 'Tôi yêu bạn', query: 'Wǒ ài nǐ' },
+      { label: 'Tạm biệt', query: 'Zàijiàn' },
+    ],
+  },
+  {
+    id: 'fr',
+    name: 'Tiếng Pháp',
+    nativeName: 'Français',
+    flag: '🇫🇷',
+    voiceLang: 'fr-FR',
+    ruleExample: {
+      original: 'Bonjour',
+      transliteration: 'Bông-giua',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: 'Bonjour' },
+      { label: 'Cảm ơn rất nhiều', query: 'Merci beaucoup' },
+      { label: 'Làm ơn', query: 'S\'il vous plaît' },
+      { label: 'Chào buổi tối', query: 'Bonsoir' },
+      { label: 'Tôi tên là...', query: 'Je m\'appelle' },
+      { label: 'Hẹn gặp lại', query: 'Au revoir' },
+    ],
+  },
+  {
+    id: 'th',
+    name: 'Tiếng Thái',
+    nativeName: 'ภาษาไทย',
+    flag: '🇹🇭',
+    voiceLang: 'th-TH',
+    ruleExample: {
+      original: 'สวัสดี (Sawatdee)',
+      transliteration: 'Xà-goát-đi',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: 'Sawatdee' },
+      { label: 'Cảm ơn', query: 'Khop khun' },
+      { label: 'Bao nhiêu tiền?', query: 'Tao rai?' },
+      { label: 'Ngon lắm', query: 'Aroi mak mak' },
+      { label: 'Xin lỗi', query: 'Khor thot' },
+      { label: 'Tạm biệt', query: 'Laa gon' },
+    ],
+  },
+  {
+    id: 'de',
+    name: 'Tiếng Đức',
+    nativeName: 'Deutsch',
+    flag: '🇩🇪',
+    voiceLang: 'de-DE',
+    ruleExample: {
+      original: 'Guten Tag',
+      transliteration: 'Gu-từn Thác',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: 'Guten Tag' },
+      { label: 'Cảm ơn nhiều', query: 'Danke schön' },
+      { label: 'Làm ơn / Xin mời', query: 'Bitte' },
+      { label: 'Bạn khỏe không?', query: 'Wie geht es Ihnen?' },
+      { label: 'Tôi yêu bạn', query: 'Ich liebe dich' },
+      { label: 'Tạm biệt', query: 'Auf Wiedersehen' },
+    ],
+  },
+  {
+    id: 'es',
+    name: 'Tiếng Tây Ban Nha',
+    nativeName: 'Español',
+    flag: '🇪🇸',
+    voiceLang: 'es-ES',
+    ruleExample: {
+      original: '¡Hola!',
+      transliteration: 'Ô-la!',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: '¡Hola! ¿Cómo estás?' },
+      { label: 'Cảm ơn nhiều', query: 'Muchas gracias' },
+      { label: 'Làm ơn', query: 'Por favor' },
+      { label: 'Ngon tuyệt', query: 'Está muy rico' },
+      { label: 'Tôi yêu bạn', query: 'Te quiero' },
+      { label: 'Hẹn gặp lại', query: 'Hasta luego' },
+    ],
+  },
+];
+
+export const TRANSLITERATION_RULES = [
+  {
+    lang: 'Tiếng Anh',
+    example: 'Hi -> Hai, Thank you -> Thẻng kiu',
+    note: 'Phiên âm âm gió, trọng âm tự nhiên theo vần tiếng Việt.',
+  },
+  {
+    lang: 'Tiếng Nhật',
+    example: 'Konnichiwa (こんにちは) -> Côn-ni-chi-wa',
+    note: 'Tách từng phách âm tiết bằng dấu gạch ngang rõ ràng, giữ âm bật.',
+  },
+  {
+    lang: 'Tiếng Trung',
+    example: 'Nǐ hǎo (你好) -> Ní hảo',
+    note: 'Chuyển thanh điệu (thanh 1, 2, 3, 4) sang dấu sắc, huyền, hỏi, ngã, nặng tiếng Việt tương đương.',
+  },
+  {
+    lang: 'Tiếng Pháp',
+    example: 'Bonjour -> Bông-giua',
+    note: 'Việt hóa âm mũi và âm đuôi nhẹ đặc trưng tiếng Pháp.',
+  },
+  {
+    lang: 'Tiếng Thái',
+    example: 'Sawatdee (สวัสดี) -> Xà-goát-đi',
+    note: 'Chuyển thanh điệu cao-thấp của tiếng Thái sang các dấu tiếng Việt thân thuộc.',
+  },
+  {
+    lang: 'Tiếng Đức',
+    example: 'Guten Tag -> Gu-từn Thác, Danke -> Đăng-kơ',
+    note: 'Việt hóa âm "w" thành "v", âm "ch" thành "kh/s", tách âm tiết rõ ràng.',
+  },
+  {
+    lang: 'Tiếng Tây Ban Nha',
+    example: '¡Hola! -> Ô-la!, Gracias -> Gờ-ra-xi-át',
+    note: 'Âm "h" câm, "j" đọc như "h", "ll" phát âm như "y", thanh điệu nhịp nhàng.',
+  },
+];

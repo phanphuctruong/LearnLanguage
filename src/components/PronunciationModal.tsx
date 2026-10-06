@@ -3,6 +3,7 @@ import {
   Mic,
   MicOff,
   Volume2,
+  Volume1,
   X,
   Sparkles,
   RotateCcw,
@@ -18,8 +19,14 @@ import {
   Layers,
   CornerDownLeft,
   Search,
+  Target,
+  ShieldAlert,
+  Wrench,
+  Check,
+  ArrowRight,
+  Edit3,
 } from 'lucide-react';
-import { TranslationResult, LanguageConfig, PronunciationEvaluation } from '../types';
+import { TranslationResult, LanguageConfig, PronunciationEvaluation, PronunciationMistake, SyllableFeedback } from '../types';
 import { speakText, stopSpeech } from '../utils/speech';
 import { useTheme } from '../context/ThemeContext';
 
@@ -598,21 +605,91 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
               </p>
             </div>
 
-            {/* Live Transcript Display */}
-            {(transcript || isRecording) && (
-              <div
-                className={`w-full p-4 rounded-2xl border ${styles.border} ${
-                  theme === 'black-gold' ? 'bg-[#06070A]' : 'bg-[#080E1E]'
-                } text-left`}
-              >
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${styles.textSecondary} block mb-1`}>
-                  Giọng nói ghi nhận được:
+            {/* Live Transcript Display & Manual / Quick Test Correction Input */}
+            <div
+              className={`w-full p-4 rounded-2xl border ${styles.border} ${
+                theme === 'black-gold' ? 'bg-[#06070A]' : 'bg-[#080E1E]'
+              } text-left space-y-2`}
+            >
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${styles.textSecondary} flex items-center gap-1.5`}>
+                  <Edit3 className="w-3.5 h-3.5 text-amber-400" />
+                  Giọng nói ghi nhận được (hoặc tự gõ để kiểm tra lỗi):
                 </span>
-                <p className={`text-sm font-semibold ${transcript ? styles.textLight : 'text-gray-500 italic'}`}>
-                  {transcript || '(Đang bắt âm thanh... Hãy phát âm từ hoặc câu trên)'}
-                </p>
+                {transcript && (
+                  <button
+                    type="button"
+                    onClick={() => setTranscript('')}
+                    className="text-[11px] text-gray-400 hover:text-rose-400 transition-colors cursor-pointer"
+                  >
+                    Xóa
+                  </button>
+                )}
               </div>
-            )}
+
+              <input
+                type="text"
+                id="input-spoken-transcript"
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                placeholder={isRecording ? 'Đang lắng nghe âm thanh từ microphone...' : 'Nhấn mic để nói, hoặc gõ cách bạn đọc vào đây (VD: gút morning, ten kìu...)'}
+                className={`w-full px-3 py-2 rounded-xl text-sm font-semibold border ${styles.border} ${
+                  theme === 'black-gold' ? 'bg-[#12141D] text-amber-100' : 'bg-[#101B33] text-blue-100'
+                } focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
+              />
+
+              {/* Quick Error Simulation Chips to immediately test AI error diagnostic */}
+              <div className="pt-1">
+                <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">
+                  Thử nghiệm nhanh các lỗi phát âm phổ biến:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Remove final consonants / tail sounds
+                      const words = currentTarget.original.split(' ');
+                      const simulated = words.map(w => w.length > 2 ? w.slice(0, -1) : w).join(' ');
+                      setTranscript(simulated);
+                      handleEvaluate(simulated);
+                    }}
+                    disabled={isAnalyzing}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-40"
+                    title="Mô phỏng lỗi người Việt hay nuốt âm đuôi s, t, d, k"
+                  >
+                    <span>⚡ Thử lỗi: Nuốt âm đuôi</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Transliteration flat reading simulation
+                      const simulated = currentTarget.vi_transliteration.replace(/[-_]/g, ' ').toLowerCase();
+                      setTranscript(simulated);
+                      handleEvaluate(simulated);
+                    }}
+                    disabled={isAnalyzing}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-40"
+                    title="Mô phỏng lỗi phát âm bằng bằng không trọng âm theo tiếng Việt"
+                  >
+                    <span>⚡ Thử lỗi: Sai trọng âm</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTranscript(currentTarget.original);
+                      handleEvaluate(currentTarget.original);
+                    }}
+                    disabled={isAnalyzing}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 transition-all cursor-pointer flex items-center gap-1 disabled:opacity-40"
+                    title="Mô phỏng phát âm chuẩn để xem đánh giá xuất sắc"
+                  >
+                    <span>⚡ Thử đọc chuẩn mẫu</span>
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Error banner if mic fails */}
             {errorMessage && (
@@ -627,7 +704,7 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
               <button
                 type="button"
                 id="btn-evaluate-pronunciation"
-                onClick={() => handleEvaluate()}
+                onClick={() => handleEvaluate(transcript)}
                 disabled={isAnalyzing || isRecording}
                 className={`px-6 py-3 rounded-full font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg cursor-pointer flex items-center gap-2 ${
                   isAnalyzing
@@ -638,12 +715,12 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
                 {isAnalyzing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    <span>AI đang phân tích khẩu hình...</span>
+                    <span>AI đang phân tích khẩu hình & sửa lỗi...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    <span>AI Chấm Điểm & Chỉnh Sửa</span>
+                    <span>AI Chấm Điểm & Chỉnh Sửa Lỗi Phát Âm</span>
                   </>
                 )}
               </button>
@@ -669,12 +746,12 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
             </div>
           </div>
 
-          {/* AI EVALUATION RESULTS PRESENTATION */}
+          {/* AI EVALUATION & COMPREHENSIVE PRONUNCIATION ERROR CORRECTION */}
           {evaluation && (
             <div
               className={`p-6 rounded-3xl border-2 ${styles.border} ${styles.bgCardSubtle} space-y-6 animate-in slide-in-from-bottom duration-200`}
             >
-              {/* Score header */}
+              {/* Score header & Native comparison */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-gray-700/30">
                 <div className="flex items-center gap-4">
                   <div
@@ -689,7 +766,7 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className={`text-base font-black ${styles.textHeading}`}>
-                        Đánh giá: {evaluation.accuracy_level}
+                        Đánh giá: {evaluation.accuracyLevel || evaluation.accuracy_level}
                       </span>
                       {evaluation.score >= 85 ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-400" />
@@ -698,7 +775,7 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
                       )}
                     </div>
                     <p className={`text-xs ${styles.textSecondary} mt-0.5`}>
-                      {evaluation.native_comparison}
+                      {evaluation.nativeComparison || evaluation.native_comparison || evaluation.feedback}
                     </p>
                   </div>
                 </div>
@@ -713,40 +790,212 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
                 )}
               </div>
 
+              {/* General Feedback Quote */}
+              {evaluation.feedback && (
+                <div className={`p-3.5 rounded-2xl border ${styles.border} ${theme === 'black-gold' ? 'bg-[#0a0c12]' : 'bg-[#0b1324]'} text-left text-xs ${styles.textLight} flex items-start gap-2.5`}>
+                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="leading-relaxed">
+                    <span className="font-bold text-amber-400 mr-1.5">Lời khuyên của Huấn luyện viên:</span>
+                    {evaluation.feedback}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: DETECTED PRONUNCIATION MISTAKES & STEP-BY-STEP FIXES (Trọng tâm chỉnh sửa lỗi phát âm) */}
+              <div className="text-left space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-black uppercase tracking-wider ${styles.textHeading} flex items-center gap-2`}>
+                    <ShieldAlert className="w-4 h-4 text-rose-400" />
+                    Chỉnh Sửa Lỗi Phát Âm Chi Tiết
+                  </span>
+                  <span className="text-[11px] font-bold text-gray-400">
+                    {(evaluation.mistakesDetected || evaluation.mistakes_detected || []).length > 0
+                      ? `Phát hiện ${(evaluation.mistakesDetected || evaluation.mistakes_detected || []).length} điểm cần sửa`
+                      : 'Không phát hiện lỗi nghiêm trọng'}
+                  </span>
+                </div>
+
+                {(evaluation.mistakesDetected || evaluation.mistakes_detected || []).length > 0 ? (
+                  <div className="space-y-3">
+                    {(evaluation.mistakesDetected || evaluation.mistakes_detected || []).map((mistake: PronunciationMistake, mIdx: number) => {
+                      const isHigh = mistake.severity === 'high';
+                      const isMed = mistake.severity === 'medium';
+                      const badgeBg = isHigh
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                        : isMed
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        : 'bg-blue-500/20 text-blue-300 border-blue-500/40';
+                      const badgeText = isHigh ? 'Cần sửa ngay' : isMed ? 'Lỗi trung bình' : 'Lỗi nhẹ';
+
+                      return (
+                        <div
+                          key={mIdx}
+                          className={`p-4 rounded-2xl border-2 ${
+                            isHigh ? 'border-rose-500/40 bg-rose-950/15' : 'border-amber-500/30 bg-amber-950/10'
+                          } space-y-3`}
+                        >
+                          {/* Mistake Header */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-md border ${badgeBg}`}>
+                                {badgeText}
+                              </span>
+                              <h4 className="text-sm font-black text-white">
+                                {mistake.title}
+                              </h4>
+                            </div>
+                          </div>
+
+                          {/* Contrast comparison: What you said vs Standard Native */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div className="p-2.5 rounded-xl bg-rose-950/30 border border-rose-500/30">
+                              <span className="text-[10px] uppercase font-bold text-rose-400 block mb-0.5">
+                                ❌ Âm bạn phát âm / Xu hướng sai:
+                              </span>
+                              <span className="font-bold text-rose-200 text-sm">
+                                {mistake.whatYouPronounced}
+                              </span>
+                            </div>
+
+                            <div className="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
+                              <span className="text-[10px] uppercase font-bold text-emerald-400 block mb-0.5">
+                                ✔ Âm chuẩn người bản ngữ:
+                              </span>
+                              <span className="font-bold text-emerald-200 text-sm">
+                                {mistake.standardNative}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Step-by-step physical fix */}
+                          <div className="p-3 rounded-xl bg-black/30 border border-gray-700/30 space-y-1">
+                            <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                              <Wrench className="w-3.5 h-3.5 text-amber-400" />
+                              Cách sửa cơ miệng & chuyển động lưỡi:
+                            </span>
+                            <p className="text-xs text-gray-200 leading-relaxed">
+                              {mistake.howToFix}
+                            </p>
+                          </div>
+
+                          {/* Fast Drill & Audio check */}
+                          {mistake.drillText && (
+                            <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
+                              <div className="text-xs text-gray-300 flex items-center gap-1.5">
+                                <span className="text-gray-400">Từ luyện sửa nhanh:</span>
+                                <span className="font-bold text-white bg-white/10 px-2 py-0.5 rounded-md">
+                                  {mistake.drillText}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => speakText(mistake.drillText || '', langConfig?.voiceLang || 'en-US', 0.85)}
+                                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 transition-colors cursor-pointer flex items-center gap-1"
+                                >
+                                  <Volume2 className="w-3.5 h-3.5" />
+                                  <span>Nghe âm chuẩn</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setTranscript(mistake.drillText || '');
+                                    handleStartPractice();
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600/80 hover:bg-emerald-500 text-white transition-colors cursor-pointer flex items-center gap-1"
+                                >
+                                  <Mic className="w-3.5 h-3.5" />
+                                  <span>Luyện phát âm lại lỗi này</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 text-left flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-bold text-emerald-300">Phát âm rất tốt!</h4>
+                      <p className="text-xs text-gray-300 mt-0.5">
+                        Không phát hiện lỗi sai phát âm nghiêm trọng nào. Bạn đã làm chủ trọng âm và các âm tiết của từ này.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Syllable-by-Syllable Breakdown */}
-              {evaluation.syllable_breakdown && evaluation.syllable_breakdown.length > 0 && (
-                <div>
+              {(evaluation.syllable_breakdown || evaluation.syllables || []).length > 0 && (
+                <div className="text-left space-y-3">
                   <span
-                    className={`text-xs font-bold uppercase tracking-wider ${styles.textSecondary} block mb-3`}
+                    className={`text-xs font-bold uppercase tracking-wider ${styles.textSecondary} flex items-center gap-1.5`}
                   >
-                    Phân tích chi tiết từng âm tiết:
+                    <Layers className="w-3.5 h-3.5 text-amber-400" />
+                    Bảng phân tích chỉnh sửa từng âm tiết:
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {evaluation.syllable_breakdown.map((syl, idx) => {
+                    {(evaluation.syllable_breakdown || evaluation.syllables || []).map((syl: SyllableFeedback, idx: number) => {
                       const isCorrect = syl.status === 'correct';
-                      const isClose = syl.status === 'almost';
+                      const isClose = syl.status === 'almost' || syl.status === 'warning';
                       const statusColor = isCorrect
                         ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300'
                         : isClose
                         ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
                         : 'border-rose-500/50 bg-rose-500/10 text-rose-300';
 
+                      const ipaDisplay = syl.ipaSyllable || syl.ipa_syllable || '';
+                      const viDisplay = syl.viApproximation || syl.vi_approximation || '';
+                      const feedbackDisplay = syl.feedback || syl.tip || '';
+                      const mouthDisplay = syl.mouthGuide || syl.mouth_guide || '';
+
                       return (
                         <div
                           key={idx}
-                          className={`p-3.5 rounded-2xl border ${statusColor} text-left space-y-1`}
+                          className={`p-3.5 rounded-2xl border ${statusColor} text-left space-y-2`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-black tracking-wide">
-                              "{syl.syllable}" ({syl.vi_approximation})
-                            </span>
+                            <div>
+                              <span className="text-sm font-black tracking-wide text-white">
+                                "{syl.syllable}"
+                              </span>
+                              {ipaDisplay && (
+                                <span className="text-xs text-gray-300 font-mono ml-1.5">
+                                  [{ipaDisplay}]
+                                </span>
+                              )}
+                              {viDisplay && (
+                                <span className="text-xs font-bold text-amber-300 ml-1.5">
+                                  ({viDisplay})
+                                </span>
+                              )}
+                            </div>
                             <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md border border-current">
                               {isCorrect ? 'Chuẩn' : isClose ? 'Tạm ổn' : 'Cần sửa'}
                             </span>
                           </div>
-                          <p className="text-xs font-medium text-gray-300">
-                            {syl.feedback}
+
+                          <p className="text-xs font-medium text-gray-200">
+                            {feedbackDisplay}
                           </p>
+
+                          {mouthDisplay && (
+                            <p className="text-[11px] text-gray-400 italic">
+                              Khẩu hình: {mouthDisplay}
+                            </p>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => speakText(syl.syllable, langConfig?.voiceLang || 'en-US', 0.8)}
+                            className="text-[11px] font-bold text-gray-300 hover:text-white flex items-center gap-1 cursor-pointer pt-0.5"
+                          >
+                            <Volume1 className="w-3.5 h-3.5" />
+                            <span>Nghe riêng âm này</span>
+                          </button>
                         </div>
                       );
                     })}
@@ -754,8 +1003,27 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
                 </div>
               )}
 
+              {/* Comprehensive Mouth & Tongue Positioning Guide */}
+              {(evaluation.mouthAndTongueGuide || evaluation.mouth_and_tongue_guide) && (
+                <div
+                  className={`p-4 rounded-2xl border-2 ${styles.border} ${
+                    theme === 'black-gold' ? 'bg-[#12141D]' : 'bg-[#0E1A34]'
+                  } text-left space-y-1.5`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <Target className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
+                      Hướng dẫn khẩu hình miệng & vị trí đặt lưỡi:
+                    </span>
+                  </div>
+                  <p className={`text-xs sm:text-sm font-medium ${styles.textLight} leading-relaxed`}>
+                    {evaluation.mouthAndTongueGuide || evaluation.mouth_and_tongue_guide}
+                  </p>
+                </div>
+              )}
+
               {/* Vietnamese-Specific Coaching Tip */}
-              {evaluation.vietnamese_speaker_tip && (
+              {(evaluation.vietnameseTip || evaluation.vietnamese_speaker_tip) && (
                 <div
                   className={`p-4 rounded-2xl border-2 ${
                     theme === 'black-gold' ? 'border-[#F59E0B]/40 bg-[#14120A]' : 'border-[#F97316]/40 bg-[#181E2F]'
@@ -764,37 +1032,66 @@ export const PronunciationModal: React.FC<PronunciationModalProps> = ({
                   <div className="flex items-center gap-1.5">
                     <Flame className="w-4 h-4 text-amber-400" />
                     <span className="text-xs font-black uppercase tracking-wider text-amber-400">
-                      Mẹo sửa lỗi người Việt hay gặp:
+                      Mẹo sửa lỗi người Việt hay gặp (Chữ Quốc Ngữ Bồi):
                     </span>
                   </div>
                   <p className={`text-xs sm:text-sm font-medium ${styles.textLight} leading-relaxed`}>
-                    {evaluation.vietnamese_speaker_tip}
+                    {evaluation.vietnameseTip || evaluation.vietnamese_speaker_tip}
+                  </p>
+                </div>
+              )}
+
+              {/* Common Vietnamese Mistakes Warning */}
+              {(evaluation.commonVietnameseMistakes || evaluation.common_vietnamese_mistakes) && (
+                <div className="p-3.5 rounded-2xl bg-amber-950/20 border border-amber-500/30 text-left space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Bẫy phát âm người Việt cần tránh:</span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    {evaluation.commonVietnameseMistakes || evaluation.common_vietnamese_mistakes}
                   </p>
                 </div>
               )}
 
               {/* Actionable recommendations list */}
-              {evaluation.actionable_fixes && evaluation.actionable_fixes.length > 0 && (
+              {(evaluation.actionableFixes || evaluation.actionable_fixes || []).length > 0 && (
                 <div className="text-left space-y-2">
                   <span
                     className={`text-xs font-bold uppercase tracking-wider ${styles.textSecondary} flex items-center gap-1.5`}
                   >
                     <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-                    Các bước khắc phục ngay:
+                    3 Bước khắc phục ngay để đạt 100 điểm:
                   </span>
                   <ul className="space-y-1.5 pl-1">
-                    {evaluation.actionable_fixes.map((fix, idx) => (
+                    {(evaluation.actionableFixes || evaluation.actionable_fixes || []).map((fix: string, idx: number) => (
                       <li
                         key={idx}
-                        className={`text-xs sm:text-sm ${styles.textLight} flex items-start gap-2`}
+                        className={`text-xs sm:text-sm ${styles.textLight} flex items-start gap-2.5 p-2 rounded-xl bg-white/5 border border-white/5`}
                       >
-                        <span className="text-emerald-400 font-bold shrink-0">✔</span>
-                        <span>{fix}</span>
+                        <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <span className="leading-relaxed">{fix}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
+
+              {/* Bottom Quick Retry CTA inside card */}
+              <div className="pt-2 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleStartPractice();
+                  }}
+                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all cursor-pointer flex items-center gap-2 shadow-lg hover:scale-105"
+                >
+                  <Mic className="w-4 h-4" />
+                  <span>Thực hành đọc lại để kiểm tra sửa lỗi</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

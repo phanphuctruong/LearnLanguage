@@ -226,10 +226,11 @@ export const ResultCard: React.FC<ResultCardProps> = ({
                   id="btn-practice-pronunciation-card"
                   onClick={onOpenPronunciation}
                   className="px-5 py-3.5 rounded-full flex items-center gap-2 font-black text-sm sm:text-base border-2 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg cursor-pointer hover:scale-102 transition-all"
-                  title="Mở phòng luyện đọc và AI chấm điểm phát âm"
+                  title="Mở phòng luyện đọc, chấm điểm và AI chỉnh sửa lỗi phát âm chi tiết"
                 >
                   <Mic className="w-5 h-5" />
-                  <span>Luyện Phát Âm</span>
+                  <span>Luyện & Sửa Lỗi Phát Âm</span>
+                  <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
                 </button>
               )}
             </div>

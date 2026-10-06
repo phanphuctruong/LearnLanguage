@@ -20,23 +20,50 @@ export type ThemeMode = 'navy-orange' | 'black-gold';
 
 export interface SyllableFeedback {
   syllable: string;
-  ipaSyllable: string;
-  status: 'correct' | 'warning' | 'error';
+  ipaSyllable?: string;
+  ipa_syllable?: string;
+  viApproximation?: string;
+  vi_approximation?: string;
+  status: 'correct' | 'almost' | 'warning' | 'error';
   tip: string;
+  feedback?: string;
+  mouthGuide?: string;
+  mouth_guide?: string;
+}
+
+export interface PronunciationMistake {
+  title: string;
+  severity: 'high' | 'medium' | 'low';
+  whatYouPronounced: string;
+  standardNative: string;
+  howToFix: string;
+  drillText?: string;
 }
 
 export interface PronunciationEvaluation {
   score: number;
-  accuracyLevel: 'Xuất sắc' | 'Rất tốt' | 'Cần luyện thêm' | 'Chưa chính xác';
+  accuracyLevel: 'Xuất sắc' | 'Rất tốt' | 'Cần luyện thêm' | 'Chưa chính xác' | string;
+  accuracy_level?: string;
   spokenText: string;
+  spoken_text?: string;
   feedback: string;
+  nativeComparison?: string;
+  native_comparison?: string;
   syllables: SyllableFeedback[];
+  syllable_breakdown?: SyllableFeedback[];
+  mistakesDetected?: PronunciationMistake[];
+  mistakes_detected?: PronunciationMistake[];
   mouthAndTongueGuide: string;
+  mouth_and_tongue_guide?: string;
   vietnameseTip: string;
+  vietnamese_speaker_tip?: string;
   commonVietnameseMistakes: string;
+  common_vietnamese_mistakes?: string;
+  actionableFixes?: string[];
+  actionable_fixes?: string[];
 }
 
-export type TargetLanguageCode = 'en' | 'ja' | 'fr' | 'th' | 'zh' | 'de' | 'es';
+export type TargetLanguageCode = 'en' | 'ja' | 'fr' | 'th' | 'zh' | 'de' | 'es' | 'ru' | 'ko' | 'ar';
 
 export interface LanguageConfig {
   id: TargetLanguageCode;

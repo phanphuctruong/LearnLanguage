@@ -134,6 +134,63 @@ export const SUPPORTED_LANGUAGES: LanguageConfig[] = [
       { label: 'Hẹn gặp lại', query: 'Hasta luego' },
     ],
   },
+  {
+    id: 'ru',
+    name: 'Tiếng Nga',
+    nativeName: 'Русский',
+    flag: '🇷🇺',
+    voiceLang: 'ru-RU',
+    ruleExample: {
+      original: 'Здравствуйте (Zdravstvuyte)',
+      transliteration: 'Xờ-đơ-rát-xtvuy-tê',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: 'Здравствуйте' },
+      { label: 'Cảm ơn rất nhiều', query: 'Большое спасибо' },
+      { label: 'Làm ơn / Không có gì', query: 'Пожалуйста' },
+      { label: 'Bạn khỏe không?', query: 'Как дела?' },
+      { label: 'Tôi yêu bạn', query: 'Я люблю тебя' },
+      { label: 'Tạm biệt', query: 'До свидания' },
+    ],
+  },
+  {
+    id: 'ko',
+    name: 'Tiếng Hàn',
+    nativeName: '한국어',
+    flag: '🇰🇷',
+    voiceLang: 'ko-KR',
+    ruleExample: {
+      original: '안녕하세요 (Annyeonghaseyo)',
+      transliteration: 'An-ni-ơng-ha-sê-dô',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: '안녕하세요' },
+      { label: 'Cảm ơn nhiều', query: '감사합니다' },
+      { label: 'Xin lỗi', query: '죄송합니다' },
+      { label: 'Ngon quá', query: '맛있어요' },
+      { label: 'Tôi yêu bạn', query: '사랑해요' },
+      { label: 'Tạm biệt', query: '안녕히 계세요' },
+    ],
+  },
+  {
+    id: 'ar',
+    name: 'Tiếng Ả Rập',
+    nativeName: 'العربية',
+    flag: '🇸🇦',
+    voiceLang: 'ar-SA',
+    ruleExample: {
+      original: 'مرحبًا (Marhaban)',
+      transliteration: 'Mác-ha-ban',
+    },
+    samplePhrases: [
+      { label: 'Xin chào', query: 'مرحبًا' },
+      { label: 'Cảm ơn rất nhiều', query: 'شكرًا جزيلًا' },
+      { label: 'Làm ơn', query: 'من فضلك' },
+      { label: 'Bạn khỏe không?', query: 'كيف حالك؟' },
+      { label: 'Hòa bình cùng bạn', query: 'السلام عليكم' },
+      { label: 'Tạm biệt', query: 'مع السلامة' },
+    ],
+  },
 ];
 
 export const TRANSLITERATION_RULES = [
@@ -171,5 +228,20 @@ export const TRANSLITERATION_RULES = [
     lang: 'Tiếng Tây Ban Nha',
     example: '¡Hola! -> Ô-la!, Gracias -> Gờ-ra-xi-át',
     note: 'Âm "h" câm, "j" đọc như "h", "ll" phát âm như "y", thanh điệu nhịp nhàng.',
+  },
+  {
+    lang: 'Tiếng Nga',
+    example: 'Здравствуйте -> Xờ-đơ-rát-xtvuy-tê, Спасибо -> X-pa-xi-ba',
+    note: 'Việt hóa cụm phụ âm liên tiếp (здр, сп), biến âm "o" không trọng âm thành "a", làm mềm âm перед e, и, я.',
+  },
+  {
+    lang: 'Tiếng Hàn',
+    example: '안녕하세요 -> An-ni-ơng-ha-sê-dô, 감사합니다 -> Cam-sa-ham-ni-đa',
+    note: 'Việt hóa patchim (phụ âm cuối), nối âm tự nhiên và nguyên âm đôi (eo -> ơ, ae -> e).',
+  },
+  {
+    lang: 'Tiếng Ả Rập',
+    example: 'مرحبًا (Marhaban) -> Mác-ha-ban, شكرًا (Shukran) -> Súc-ran',
+    note: 'Việt hóa âm họng đặc trưng (ح, ع), âm bật sâu (ق, خ) và kéo dài các trường âm (aa, ii, uu).',
   },
 ];

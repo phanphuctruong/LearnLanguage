@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className={`text-xs ${styles.textSecondary} font-semibold line-clamp-1`}>
-              7 Ngôn ngữ: Anh · Nhật · Trung · Pháp · Thái · Đức · T.B.Nha
+              10 Ngôn ngữ: Anh · Nhật · Trung · Pháp · Thái · Đức · T.B.Nha · Nga · Hàn · Ả Rập
             </p>
           </div>
         </div>

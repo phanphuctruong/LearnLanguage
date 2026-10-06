@@ -250,6 +250,90 @@ const STARTER_MESSAGES: Record<TargetLanguageCode, ChatMessage> = {
     ],
     timestamp: Date.now(),
   },
+  ru: {
+    id: 'starter-ru',
+    role: 'assistant',
+    content: 'Здравствуйте! Как ваши дела? (Xin chào! Dạo này công việc bạn thế nào?)',
+    original: 'Здравствуйте! Как ваши дела?',
+    meaning_vi: 'Xin chào! Dạo này công việc của bạn thế nào?',
+    vi_transliteration: 'Xờ-đơ-rát-xtvuy-tê! Cắc va-si đi-la?',
+    ipa: '/ˈzdrastvʊjtʲe kak ˈvaʂɨ dʲɪˈla/',
+    formatted_message: 'Здравствуйте! Как ваши дела? (Xin chào! Dạo này công việc bạn thế nào?)',
+    suggested_replies: [
+      {
+        original: 'Спасибо, всё отлично! А у вас?',
+        meaning_vi: 'Cảm ơn, mọi chuyện rất tuyệt! Còn bạn thì sao?',
+        vi_transliteration: 'X-pa-xi-ba, v-xô át-lít-x-nơ! A u va-xơ?',
+      },
+      {
+        original: 'Очень приятно познакомиться!',
+        meaning_vi: 'Rất vui được làm quen với bạn!',
+        vi_transliteration: 'Ô-chin pờ-ri-dát-nơ pơ-dơ-na-cô-mít-xa!',
+      },
+      {
+        original: 'Я учу русский язык каждый день.',
+        meaning_vi: 'Tôi học tiếng Nga mỗi ngày.',
+        vi_transliteration: 'Da u-chu rút-x-ki da-dức ca-gi-đưi đen.',
+      },
+    ],
+    timestamp: Date.now(),
+  },
+  ko: {
+    id: 'starter-ko',
+    role: 'assistant',
+    content: '안녕하세요! 오늘 기분이 어떠세요? (Xin chào! Hôm nay tâm trạng bạn thế nào?)',
+    original: '안녕하세요! 오늘 기분이 어떠세요?',
+    meaning_vi: 'Xin chào! Hôm nay tâm trạng bạn thế nào?',
+    vi_transliteration: 'An-ni-ơng-ha-sê-dô! Ô-nưl ki-bu-ni ơ-tơ-sê-dô?',
+    ipa: '/an.ɲʌŋ.ɦa.se.jo o.nɯl ki.bu.ni ʌ.t͈ʌ.se.jo/',
+    formatted_message: '안녕하세요! 오늘 기분이 어떠세요? (Xin chào! Hôm nay tâm trạng bạn thế nào?)',
+    suggested_replies: [
+      {
+        original: '네, 아주 좋아요! 감사합니다.',
+        meaning_vi: 'Vâng, rất tốt! Cảm ơn bạn.',
+        vi_transliteration: 'Nê, a-chu cho-a-dô! Cam-sa-ham-ni-đa.',
+      },
+      {
+        original: '만나서 정말 반갑습니다!',
+        meaning_vi: 'Rất vui được gặp bạn!',
+        vi_transliteration: 'Man-na-xơ châng-man ban-gắp-xừm-ni-đa!',
+      },
+      {
+        original: '저는 한국어를 배우고 있어요.',
+        meaning_vi: 'Tôi đang học tiếng Hàn Quốc.',
+        vi_transliteration: 'Chơ-nưn han-gúc-ơ-rưl pe-u-gô ít-xơ-dô.',
+      },
+    ],
+    timestamp: Date.now(),
+  },
+  ar: {
+    id: 'starter-ar',
+    role: 'assistant',
+    content: 'أهلاً وسهلاً! كيف حالك اليوم؟ (Xin chào mừng bạn! Hôm nay bạn khỏe không?)',
+    original: 'أهلاً وسهلاً! كيف حالك اليوم؟',
+    meaning_vi: 'Xin chào mừng bạn! Hôm nay bạn khỏe không?',
+    vi_transliteration: 'Áh-lan oa xáh-lan! Cay-pha ha-lu-ca an-dao-mừ?',
+    ipa: '/ʔahlan wa sahlan kajfa ħaːluka aljawm/',
+    formatted_message: 'أهلاً وسهلاً! كيف حالك اليوم؟ (Xin chào mừng bạn! Hôm nay bạn khỏe không?)',
+    suggested_replies: [
+      {
+        original: 'أنا بخير والحمد لله! وأنت؟',
+        meaning_vi: 'Tôi khỏe, tạ ơn Thượng Đế! Còn bạn?',
+        vi_transliteration: 'A-na bi-khayr oan ham-đu lin-la! Oa ân-ta?',
+      },
+      {
+        original: 'فرصة سعيدة جدًا بلقائك!',
+        meaning_vi: 'Thật là một dịp may mắn và vui mừng khi gặp bạn!',
+        vi_transliteration: 'Phuốc-xa xa-i-đa chít-đan bi-li-ca-ích!',
+      },
+      {
+        original: 'أنا أتعلم اللغة العربية الآن.',
+        meaning_vi: 'Bây giờ tôi đang học tiếng Ả Rập.',
+        vi_transliteration: 'A-na a-ta-an-lam an-lu-ga-ta an-a-ra-bi-da an-an.',
+      },
+    ],
+    timestamp: Date.now(),
+  },
 };
 
 export const LanguageChatModal: React.FC<LanguageChatModalProps> = ({
@@ -377,9 +461,20 @@ export const LanguageChatModal: React.FC<LanguageChatModalProps> = ({
         }),
       });
 
-      const resJson = await response.json();
-      if (!response.ok || !resJson.success) {
-        throw new Error(resJson.error || 'Trợ lý AI chưa thể phản hồi lúc này.');
+      const rawText = await response.text();
+      let resJson: any = null;
+
+      try {
+        resJson = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error('Failed to parse API response as JSON:', rawText);
+        throw new Error(
+          'Hệ thống đang cập nhật kết nối đến Trợ lý AI. Bạn hãy thử lại sau vài giây nhé!'
+        );
+      }
+
+      if (!response.ok || !resJson?.success) {
+        throw new Error(resJson?.error || 'Trợ lý AI chưa thể phản hồi lúc này.');
       }
 
       const data = resJson.data;

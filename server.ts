@@ -28,7 +28,7 @@ const getGeminiClient = () => {
 };
 
 const SYSTEM_INSTRUCTION = `Bạn là một chuyên gia ngôn ngữ và trợ lý ứng dụng học ngoại ngữ thông minh số 1 cho người Việt.
-Ứng dụng hỗ trợ 7 ngôn ngữ: Tiếng Anh, Tiếng Nhật, Tiếng Pháp, Tiếng Thái, Tiếng Trung, Tiếng Đức, Tiếng Tây Ban Nha.
+Ứng dụng hỗ trợ 10 ngôn ngữ: Tiếng Anh, Tiếng Nhật, Tiếng Pháp, Tiếng Thái, Tiếng Trung, Tiếng Đức, Tiếng Tây Ban Nha, Tiếng Nga, Tiếng Hàn, Tiếng Ả Rập.
 
 Nhiệm vụ trọng tâm:
 1. Khi người dùng nhập từ hoặc câu (đặc biệt là tiếng Việt, hoặc từ ngôn ngữ mục tiêu), dịch sang ngôn ngữ mục tiêu ở trường "original".
@@ -47,6 +47,9 @@ Quy tắc phiên âm tiếng Việt bồi:
 - Thái: "Sawatdee" (สวัสดี) -> "Xà-goát-đi", "Khop khun" (ขอบคุณ) -> "Khọp-khun"
 - Đức: "Guten Tag" -> "Gu-từn Thác", "Danke schön" -> "Đăng-kơ suơn"
 - Tây Ban Nha: "Hola" -> "Ô-la", "Muchas gracias" -> "Mu-chát gờ-ra-xi-át"
+- Nga: "Здравствуйте" -> "Xờ-đơ-rát-xtvuy-tê", "Спасибо" -> "X-pa-xi-ba"
+- Hàn: "안녕하세요" -> "An-ni-ơng-ha-sê-dô", "감사합니다" -> "Cam-sa-ham-ni-đa"
+- Ả Rập: "مرحبًا" (Marhaban) -> "Mác-ha-ban", "شكرًا" (Shukran) -> "Súc-ran"
 
 Chỉ trả về định dạng JSON thuần túy theo đúng lược đồ, không kèm văn bản giải thích nào khác.`;
 
@@ -68,6 +71,9 @@ app.post("/api/translate", async (req, res) => {
       "Tiếng Trung",
       "Tiếng Đức",
       "Tiếng Tây Ban Nha",
+      "Tiếng Nga",
+      "Tiếng Hàn",
+      "Tiếng Ả Rập",
     ];
     const targetLang = validLanguages.includes(targetLanguage) ? targetLanguage : "Tiếng Anh";
 
@@ -225,25 +231,34 @@ app.post("/api/pronunciation-evaluate", async (req, res) => {
     const ai = getGeminiClient();
     const cleanSpoken = (spokenText || "").trim();
 
-    const prompt = `Bạn là Chuyên gia Ngữ âm và Huấn luyện viên phát âm bản xứ (Pronunciation Coach) dành riêng cho người Việt.
-Nhiệm vụ: Đánh giá và hướng dẫn chỉnh sửa phát âm chi tiết cho người học.
+    const prompt = `Bạn là Chuyên gia Ngữ âm và Huấn luyện viên chỉnh sửa phát âm bản xứ (Pronunciation Coach) số 1 dành riêng cho người Việt.
+Nhiệm vụ: Đánh giá cực kỳ chi tiết, chỉ ra các lỗi phát âm cụ thể và hướng dẫn phương pháp chỉnh sửa cơ miệng, lưỡi, thanh quản và phiên âm bồi tiếng Việt để người học sửa được ngay.
 
-Thông tin cần đánh giá:
+Thông tin cần phân tích:
 - Từ/Câu mục tiêu: "${targetWord.trim()}"
 - Ngôn ngữ: ${targetLanguage || "Tiếng Anh"}
 - Ký âm IPA chuẩn: "${ipa || ""}"
 - Phiên âm tiếng Việt bồi chuẩn: "${viTransliteration || ""}"
-- Âm thanh người dùng vừa đọc (nhận diện): "${cleanSpoken || "(Người dùng luyện đọc từ này)"}"
+- Giọng người dùng vừa phát âm (nhận diện được): "${cleanSpoken || "(Người dùng luyện đọc từ này)"}"
 
-Yêu cầu phân tích:
-1. Chấm điểm độ chính xác phát âm (thang điểm 0 - 100).
-   - Nếu từ nhận diện trùng khớp hoặc rất sát với từ mục tiêu: cho từ 85-98 điểm ("Xuất sắc" hoặc "Rất tốt").
-   - Nếu lệch một phần âm cuối, trọng âm hoặc nguyên âm: cho 65-84 điểm ("Rất tốt" hoặc "Cần luyện thêm").
-   - Nếu đọc sai hoặc lệch nhiều: cho 30-64 điểm ("Cần luyện thêm" hoặc "Chưa chính xác").
-2. Chia từ/câu thành từng âm tiết (syllables) cụ thể và đánh giá trạng thái ("correct" | "warning" | "error") kèm lời khuyên ngắn cho từng âm tiết.
-3. Hướng dẫn chi tiết khẩu hình miệng (độ mở miệng, môi chụm hay bè) và vị trí đặt đầu lưỡi/răng.
-4. Mẹo sửa phát âm qua chữ quốc ngữ tiếng Việt bồi (chỉ rõ cách mượn âm quen thuộc để bật đúng âm khó).
-5. Chỉ ra lỗi điển hình mà người Việt hay mắc phải khi nói từ này.`;
+Yêu cầu phân tích & sửa lỗi phát âm:
+1. Chấm điểm độ chính xác (0 - 100):
+   - Đọc chuẩn, rõ âm cuối và trọng âm: 85 - 98 điểm ("Xuất sắc" hoặc "Rất tốt").
+   - Đọc được nhưng nuốt âm đuôi, dẹt nguyên âm hoặc sai trọng âm: 60 - 84 điểm ("Cần luyện thêm").
+   - Đọc lệch nhiều hoặc đọc nhầm từ: 30 - 59 điểm ("Chưa chính xác").
+2. So sánh giọng đọc: Nhận xét so sánh cách đọc của người dùng với người bản xứ (nativeComparison).
+3. Danh sách lỗi phát âm phát hiện được (mistakesDetected):
+   - Chỉ rõ 1-3 lỗi phát âm cụ thể (Ví dụ: "Nuốt âm đuôi /t/, /s/", "Lạc trọng âm vào âm tiết 2", "Nguyên âm /æ/ bị đọc thành /e/", "Chưa uốn cong đầu lưỡi khi phát âm /r/").
+   - Xác định mức độ (severity: "high" | "medium" | "low").
+   - Âm người dùng đã đọc (whatYouPronounced) vs Âm chuẩn người bản xứ (standardNative).
+   - Hướng dẫn sửa từng bước (howToFix): Môi, răng, lưỡi, luồng hơi.
+   - Bài tập sửa nhanh (drillText): Từ hoặc câu ngắn để luyện ngay.
+4. Bẻ nhỏ từ/câu thành từng âm tiết (syllables):
+   - Mỗi âm tiết gồm ký âm IPA (ipaSyllable), phiên âm bồi tương đương (viApproximation), trạng thái (status: "correct" | "almost" | "warning" | "error"), lời khuyên sửa cụ thể (tip) và khẩu hình (mouthGuide).
+5. Hướng dẫn toàn diện khẩu hình & vị trí lưỡi (mouthAndTongueGuide).
+6. Mẹo bồi tiếng Việt độc quyền (vietnameseTip): Cách mượn âm trong tiếng Việt để phát âm chuẩn xác không tốn sức.
+7. Cảnh báo lỗi điển hình người Việt hay gặp (commonVietnameseMistakes).
+8. 3 bước hành động sửa lỗi ngay (actionableFixes).`;
 
     const candidateModels = ["gemini-3.1-flash-lite", "gemini-3.8-flash"];
     let responseText = "";
@@ -276,17 +291,40 @@ Yêu cầu phân tích:
                   type: Type.STRING,
                   description: "Nhận xét tổng quan và khích lệ người học",
                 },
+                nativeComparison: {
+                  type: Type.STRING,
+                  description: "So sánh trực quan với người bản ngữ",
+                },
+                mistakesDetected: {
+                  type: Type.ARRAY,
+                  description: "Các lỗi phát âm cụ thể cần chỉnh sửa",
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      title: { type: Type.STRING, description: "Tên lỗi phát âm" },
+                      severity: { type: Type.STRING, enum: ["high", "medium", "low"] },
+                      whatYouPronounced: { type: Type.STRING, description: "Âm bạn đọc hoặc lỗi gặp phải" },
+                      standardNative: { type: Type.STRING, description: "Âm chuẩn bản xứ" },
+                      howToFix: { type: Type.STRING, description: "Cách sửa cơ miệng & lưỡi từng bước" },
+                      drillText: { type: Type.STRING, description: "Từ luyện tập sửa nhanh" },
+                    },
+                    required: ["title", "severity", "whatYouPronounced", "standardNative", "howToFix"],
+                  },
+                },
                 syllables: {
                   type: Type.ARRAY,
+                  description: "Phân tích chi tiết từng âm tiết",
                   items: {
                     type: Type.OBJECT,
                     properties: {
                       syllable: { type: Type.STRING, description: "Âm tiết của từ" },
                       ipaSyllable: { type: Type.STRING, description: "Ký hiệu IPA của âm tiết đó" },
-                      status: { type: Type.STRING, description: "correct | warning | error" },
+                      viApproximation: { type: Type.STRING, description: "Phiên âm bồi của âm tiết" },
+                      status: { type: Type.STRING, enum: ["correct", "almost", "warning", "error"] },
                       tip: { type: Type.STRING, description: "Gợi ý chỉnh sửa ngắn cho âm tiết này" },
+                      mouthGuide: { type: Type.STRING, description: "Khẩu hình cho âm tiết này" },
                     },
-                    required: ["syllable", "ipaSyllable", "status", "tip"],
+                    required: ["syllable", "ipaSyllable", "viApproximation", "status", "tip"],
                   },
                 },
                 mouthAndTongueGuide: {
@@ -301,23 +339,35 @@ Yêu cầu phân tích:
                   type: Type.STRING,
                   description: "Lỗi người Việt hay mắc phải khi phát âm từ này",
                 },
+                actionableFixes: {
+                  type: Type.ARRAY,
+                  description: "3 bước hành động khắc phục ngay",
+                  items: { type: Type.STRING },
+                },
               },
               required: [
                 "score",
                 "accuracyLevel",
                 "spokenText",
                 "feedback",
+                "nativeComparison",
+                "mistakesDetected",
                 "syllables",
                 "mouthAndTongueGuide",
                 "vietnameseTip",
                 "commonVietnameseMistakes",
+                "actionableFixes",
               ],
             },
           },
         });
 
         if (response.text) {
-          responseText = response.text.trim();
+          let cleaned = response.text.trim();
+          if (cleaned.startsWith("```")) {
+            cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+          }
+          responseText = cleaned;
           break;
         }
       } catch (err: any) {
@@ -330,7 +380,49 @@ Yêu cầu phân tích:
       throw lastError || new Error("Không thể kết nối đến máy chủ AI chấm điểm.");
     }
 
-    const evaluation = JSON.parse(responseText);
+    let rawEval: any;
+    try {
+      rawEval = JSON.parse(responseText);
+    } catch (parseErr) {
+      console.error("Pronunciation eval JSON parse error:", responseText);
+      throw new Error("Dữ liệu phân tích phát âm không đúng định dạng JSON.");
+    }
+
+    // Map & normalize both camelCase and snake_case to guarantee seamless compatibility
+    const evaluation = {
+      score: rawEval.score ?? 80,
+      accuracyLevel: rawEval.accuracyLevel || "Rất tốt",
+      accuracy_level: rawEval.accuracyLevel || "Rất tốt",
+      spokenText: rawEval.spokenText || cleanSpoken,
+      spoken_text: rawEval.spokenText || cleanSpoken,
+      feedback: rawEval.feedback || "",
+      nativeComparison: rawEval.nativeComparison || "",
+      native_comparison: rawEval.nativeComparison || "",
+      syllables: rawEval.syllables || [],
+      syllable_breakdown: (rawEval.syllables || []).map((s: any) => ({
+        syllable: s.syllable,
+        ipaSyllable: s.ipaSyllable,
+        ipa_syllable: s.ipaSyllable,
+        viApproximation: s.viApproximation,
+        vi_approximation: s.viApproximation,
+        status: s.status,
+        tip: s.tip,
+        feedback: s.tip,
+        mouthGuide: s.mouthGuide,
+        mouth_guide: s.mouthGuide,
+      })),
+      mistakesDetected: rawEval.mistakesDetected || [],
+      mistakes_detected: rawEval.mistakesDetected || [],
+      mouthAndTongueGuide: rawEval.mouthAndTongueGuide || "",
+      mouth_and_tongue_guide: rawEval.mouthAndTongueGuide || "",
+      vietnameseTip: rawEval.vietnameseTip || "",
+      vietnamese_speaker_tip: rawEval.vietnameseTip || "",
+      commonVietnameseMistakes: rawEval.commonVietnameseMistakes || "",
+      common_vietnamese_mistakes: rawEval.commonVietnameseMistakes || "",
+      actionableFixes: rawEval.actionableFixes || [],
+      actionable_fixes: rawEval.actionableFixes || [],
+    };
+
     res.json({ success: true, evaluation });
   } catch (error: any) {
     console.error("Pronunciation evaluation error:", error);
@@ -516,7 +608,11 @@ NHIỆM VỤ QUAN TRỌNG CỦA BẠN (GỒM 3 PHẦN CHÍNH):
         });
 
         if (response.text) {
-          responseText = response.text.trim();
+          let cleaned = response.text.trim();
+          if (cleaned.startsWith("```")) {
+            cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+          }
+          responseText = cleaned;
           break;
         }
       } catch (err: any) {
@@ -529,11 +625,19 @@ NHIỆM VỤ QUAN TRỌNG CỦA BẠN (GỒM 3 PHẦN CHÍNH):
       throw lastError || new Error("Không thể kết nối đến Trợ lý AI trò chuyện lúc này.");
     }
 
-    const data = JSON.parse(responseText);
+    let data: any;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseErr) {
+      console.error("JSON parse error for responseText:", responseText);
+      throw new Error("Dữ liệu phản hồi từ AI không đúng chuẩn JSON. Vui lòng thử lại!");
+    }
+
     res.json({ success: true, data });
   } catch (error: any) {
     console.error("Chat API error:", error);
     res.status(500).json({
+      success: false,
       error: error?.message || "Đã xảy ra lỗi trong cuộc hội thoại.",
     });
   }
@@ -561,6 +665,9 @@ app.get("/api/tts", async (req, res) => {
     else if (lower.startsWith("vi")) tl = "vi";
     else if (lower.startsWith("de")) tl = "de";
     else if (lower.startsWith("es")) tl = "es";
+    else if (lower.startsWith("ru")) tl = "ru";
+    else if (lower.startsWith("ko")) tl = "ko";
+    else if (lower.startsWith("ar")) tl = "ar";
 
     // Clean text: strip parenthesis or romanization
     let cleanText = text.trim();
@@ -600,6 +707,14 @@ app.get("/api/tts", async (req, res) => {
 // Health check
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", service: "Vietnamese Language Learning Assistant" });
+});
+
+// All unhandled API routes must return JSON with 404, NEVER fallback to HTML
+app.all("/api/*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `API endpoint không tồn tại: ${req.method} ${req.originalUrl}`,
+  });
 });
 
 async function startServer() {
